@@ -23,5 +23,7 @@ test:
 	go test ./...
 
 clean:
-	rm -rf tmp/*
+	go clean
+	rm -rf tmp/
+	mkdir -p tmp/
 
