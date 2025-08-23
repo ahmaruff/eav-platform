@@ -9,16 +9,17 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ahmaruff/eav-platform/internal/auth"
+	"github.com/ahmaruff/eav-platform/internal/infrastructure/repository"
 	"github.com/ahmaruff/eav-platform/internal/shared"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/ahmaruff/eav-platform/internal/user"
 	"github.com/joho/godotenv"
 )
 
 func main() {
 	// Load config .env
 	godotenv.Load()
-	config := shared.Load()
+	config := shared.LoadConfig()
 
 	// Setup logging
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
@@ -36,26 +37,24 @@ func main() {
 
 	defer db.Close() // cleanup
 
-	// Setup router
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	// Repositories
+	userRepo := repository.NewUserSQLite(db)
 
-	// Basic routes
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("EAV Platform - Coming soon!"))
-	})
+	// Services
+	userService := user.NewService(userRepo)
+	authService := auth.NewService(db)
 
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"status":"ok"}`))
-	})
+	// Handlers
+	userHandler := user.NewHandler(userService)
+	authHandler := auth.NewHandler(authService, userService)
+
+	// Setup routes
+	router := setupRoutes(authService, userHandler, authHandler)
 
 	// Server setup
 	srv := &http.Server{
 		Addr:         ":" + config.Port,
-		Handler:      r,
+		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
