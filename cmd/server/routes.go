@@ -3,10 +3,25 @@ package main
 import (
 	"github.com/ahmaruff/eav-platform/internal/auth"
 	"github.com/ahmaruff/eav-platform/internal/user"
+	"github.com/ahmaruff/eav-platform/templates"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"log/slog"
 	"net/http"
 )
+
+func customRecoverer(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				slog.Error("Panic recovered", "error", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				templates.Error500().Render(r.Context(), w)
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
 
 func setupRoutes(authService *auth.Service, userHandler *user.Handler, authHandler *auth.Handler) http.Handler {
 	r := chi.NewRouter()
@@ -14,11 +29,16 @@ func setupRoutes(authService *auth.Service, userHandler *user.Handler, authHandl
 	// Global middleware
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
 	r.Use(authService.SessionMiddleware)
+	r.Use(customRecoverer) // Custom 500 handler
 
 	// STATIC
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+
+	// Error routes
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		templates.Error404().Render(r.Context(), w)
+	})
 
 	// Basic routes
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
