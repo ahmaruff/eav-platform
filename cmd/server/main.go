@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/ahmaruff/eav-platform/internal/shared"
 	"github.com/ahmaruff/eav-platform/internal/user"
 	"github.com/joho/godotenv"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
@@ -22,10 +24,19 @@ func main() {
 	config := shared.LoadConfig()
 
 	// Setup logging
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	fileWriter := &lumberjack.Logger{
+		Filename:   config.Log.File,
+		MaxAge:     config.Log.MaxAge,
+		MaxBackups: config.Log.MaxBackups,
+		Compress:   true,
+	}
+
+	// Multi-writer: console + rotating file
+	multiWriter := io.MultiWriter(os.Stdout, fileWriter)
+
+	logger := slog.New(slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{
 		Level: config.GetLogLevel(),
 	}))
-
 	slog.SetDefault(logger)
 
 	// Setup database
