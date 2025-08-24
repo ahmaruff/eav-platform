@@ -1,0 +1,88 @@
+package templates
+
+templ LoginForm() {
+	@Layout("Login", loginContent())
+}
+
+templ loginContent() {
+	<div class="min-h-screen flex items-center justify-center">
+		<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+			<h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
+			<form action="/login" method="post" class="space-y-4">
+				<div>
+					<label class="block text-sm font-medium mb-2">Email</label>
+					<input
+						type="email"
+						name="email"
+						required
+						class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-2">Password</label>
+					<input
+						type="password"
+						name="password"
+						required
+						class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
+					Login
+				</button>
+				<p class="text-center mt-4">
+					<a href="/register" class="text-blue-600 hover:underline">Don't have account?</a>
+				</p>
+			</form>
+		</div>
+	</div>
+}
+
+templ RegisterForm() {
+	@Layout("Register", registerContent())
+}
+
+templ registerContent() {
+	<div class="min-h-screen flex items-center justify-center">
+		<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+			<h1 class="text-2xl font-bold mb-6 text-center">Create Account</h1>
+			<form action="/register" method="post" class="space-y-4">
+				<div>
+					<label class="block text-sm font-medium mb-2">Email</label>
+					<input
+						type="email"
+						name="email"
+						required
+						class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-2">Password</label>
+					<input
+						type="password"
+						name="password"
+						minlength="8"
+						required
+						class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<div>
+					<label class="block text-sm font-medium mb-2">Confirm Password</label>
+					<input
+						type="password"
+						name="confirm_password"
+						minlength="8"
+						required
+						class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
+					Create Account
+				</button>
+			</form>
+			<p class="text-center mt-4">
+				<a href="/login" class="text-blue-600 hover:underline">Already have account?</a>
+			</p>
+		</div>
+	</div>
+}

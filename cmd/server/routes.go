@@ -17,6 +17,9 @@ func setupRoutes(authService *auth.Service, userHandler *user.Handler, authHandl
 	r.Use(middleware.Recoverer)
 	r.Use(authService.SessionMiddleware)
 
+	// STATIC
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
+
 	// Basic routes
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ahmaruff/eav-platform/internal/user"
+	"github.com/ahmaruff/eav-platform/templates"
 )
 
 type Handler struct {
@@ -20,7 +21,7 @@ func NewHandler(authService *Service, userService *user.Service) *Handler {
 
 func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 	// render login form
-	w.Write([]byte("Login Form - Coming Soon"))
+	templates.LoginForm().Render(r.Context(), w)
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -48,15 +49,21 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ShowRegister(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Register Form - Coming Soon"))
+	templates.RegisterForm().Render(r.Context(), w)
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
+	confirmPassword := r.FormValue("confirm_password")
 
 	if email == "" || password == "" {
 		http.Error(w, "Email and password required", http.StatusBadRequest)
+		return
+	}
+
+	if password != confirmPassword {
+		http.Error(w, "Password missmatch", http.StatusBadRequest)
 		return
 	}
 

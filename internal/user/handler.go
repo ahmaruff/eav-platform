@@ -2,6 +2,8 @@ package user
 
 import (
 	"net/http"
+
+	"github.com/ahmaruff/eav-platform/templates"
 )
 
 type Handler struct {
@@ -27,6 +29,5 @@ func (h *Handler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fix string formatting
-	w.Write([]byte("Dashboard - " + user.Email))
+	templates.UserDashboard(user.Email).Render(r.Context(), w)
 }

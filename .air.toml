@@ -6,7 +6,7 @@ tmp_dir = "tmp"
   bin = "tmp/main"
   full_bin = ""
   include_ext = ["go", "tpl", "tmpl", "html"]
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "node_modules", "dist", "bin", "build", "logs"]
 
 [log]
   time = true
