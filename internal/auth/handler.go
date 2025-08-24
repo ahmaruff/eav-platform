@@ -21,15 +21,26 @@ func NewHandler(authService *Service, userService *user.Service) *Handler {
 
 func (h *Handler) ShowLogin(w http.ResponseWriter, r *http.Request) {
 	// render login form
-	templates.LoginForm().Render(r.Context(), w)
+	var errors []string
+	templates.LoginForm(errors).Render(r.Context(), w)
 }
 
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 
-	if email == "" || password == "" {
-		http.Error(w, "Email and password required", http.StatusBadRequest)
+	var errors []string
+
+	if email == "" {
+		errors = append(errors, "Email is required")
+	}
+
+	if password == "" {
+		errors = append(errors, "Password is required")
+	}
+
+	if len(errors) > 0 {
+		templates.LoginForm(errors).Render(r.Context(), w)
 		return
 	}
 
@@ -40,7 +51,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userService.ValidateLogin(r.Context(), req)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		errors = append(errors, "Invalid email or password")
+		templates.LoginForm(errors).Render(r.Context(), w)
 		return
 	}
 
@@ -49,7 +61,8 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ShowRegister(w http.ResponseWriter, r *http.Request) {
-	templates.RegisterForm().Render(r.Context(), w)
+	var errors []string
+	templates.RegisterForm(errors).Render(r.Context(), w)
 }
 
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
@@ -57,13 +70,31 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 	confirmPassword := r.FormValue("confirm_password")
 
-	if email == "" || password == "" {
-		http.Error(w, "Email and password required", http.StatusBadRequest)
+	var errors []string
+
+	if email == "" {
+		errors = append(errors, "Email is required")
+	}
+
+	if password == "" {
+		errors = append(errors, "Password is required")
+	}
+
+	if confirmPassword == "" {
+		errors = append(errors, "Confirm Password is required")
+	}
+
+	if len(errors) > 0 {
+		templates.RegisterForm(errors).Render(r.Context(), w)
 		return
 	}
 
 	if password != confirmPassword {
-		http.Error(w, "Password missmatch", http.StatusBadRequest)
+		errors = append(errors, "Password missmatch")
+	}
+
+	if len(errors) > 0 {
+		templates.RegisterForm(errors).Render(r.Context(), w)
 		return
 	}
 
@@ -74,7 +105,8 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.userService.CreateUser(r.Context(), req)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		errors = append(errors, err.Error())
+		templates.RegisterForm(errors).Render(r.Context(), w)
 		return
 	}
 

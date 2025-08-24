@@ -1,13 +1,20 @@
 package templates
 
-templ LoginForm() {
-	@Layout("Login", loginContent())
+templ LoginForm(errors []string) {
+	@Layout("Login", loginContent(errors))
 }
 
-templ loginContent() {
+templ loginContent(errors []string) {
 	<div class="min-h-screen flex items-center justify-center">
 		<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
 			<h1 class="text-2xl font-bold mb-6 text-center">Login</h1>
+			if len(errors) > 0 {
+				<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+					for _, err := range errors {
+						<p class="text-sm">{ err }</p>
+					}
+				</div>
+			}
 			<form action="/login" method="post" class="space-y-4">
 				<div>
 					<label class="block text-sm font-medium mb-2">Email</label>
@@ -38,14 +45,21 @@ templ loginContent() {
 	</div>
 }
 
-templ RegisterForm() {
-	@Layout("Register", registerContent())
+templ RegisterForm(errors []string) {
+	@Layout("Register", registerContent(errors))
 }
 
-templ registerContent() {
+templ registerContent(errors []string) {
 	<div class="min-h-screen flex items-center justify-center">
 		<div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
 			<h1 class="text-2xl font-bold mb-6 text-center">Create Account</h1>
+			if len(errors) > 0 {
+				<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+					for _, err := range errors {
+						<p class="text-sm">{ err }</p>
+					}
+				</div>
+			}
 			<form action="/register" method="post" class="space-y-4">
 				<div>
 					<label class="block text-sm font-medium mb-2">Email</label>
